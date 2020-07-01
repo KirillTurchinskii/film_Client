@@ -8,6 +8,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class HttpsClient {
 
+  static final String key = "72b56103e43843412a992a8d64bf96e9";
+
   public static void main(String[] args) {
     new HttpsClient().testIt();
   }
@@ -15,7 +17,9 @@ public class HttpsClient {
   private void testIt() {
 
     String https_url =
-      "https://easy.test-assignment-a.loyaltyplant.net/3/genre/movie/list?api_key=72b56103e43843412a992a8d64bf96e9";
+      //"https://easy.test-assignment-a.loyaltyplant.net/3/genre/movie/list?api_key="+key;
+      "https://easy.test-assignment-a.loyaltyplant.net/3/discover/movie?api_key=" + key + "&page" +
+      "=20";
     URL url;
     try {
 
@@ -79,7 +83,8 @@ public class HttpsClient {
 //          System.out.println(input);
 //        }
         br.close();
-        JsonParser.parseGenes(input);
+        //JsonParser.parseGenes(input);
+        JsonParser.parseFilms(input);
       } catch (IOException e) {
         e.printStackTrace();
       }
