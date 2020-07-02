@@ -1,51 +1,72 @@
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
+import java.util.HashMap;
 
-import javax.net.ssl.HttpsURLConnection;
+import org.json.JSONArray;
+
+import utils.InputReaderUtils;
 
 public class Main {
 
-  public static void main(String[] args) throws Exception {
-    /////////
-//    String httpsURL =
-//      "https://easy.test-assignment-a.loyaltyplant.net/3/genre/movie/list?api_key=72b56103e43843412a992a8d64bf96e9";
-//    URL myUrl = new URL(httpsURL);
-//    HttpsURLConnection conn = (HttpsURLConnection)myUrl.openConnection();
-//    InputStream is = conn.getInputStream();
-//    InputStreamReader isr = new InputStreamReader(is);
-//    BufferedReader br = new BufferedReader(isr);
-//
-//    String inputLine;
-//
-//    while ((inputLine = br.readLine()) != null) {
-//      System.out.println(inputLine);
-//    }
-//
-//    br.close();
+  static final String key = "72b56103e43843412a992a8d64bf96e9";
 
-    ////////////
+  public static void main(String[] args) {
 
-    String uri =
-      "https://easy.test-assignment-a.loyaltyplant.net/3/genre/movie/list?api_key=72b56103e43843412a992a8d64bf96e9";
+    int pageNumber = 1;
+    String genresURL = "https://easy.test-assignment-a.loyaltyplant.net/3/genre/movie/list?api_key=" + key;
+    String filmUrlWithoutPageNum = "https://easy.test-assignment-a.loyaltyplant.net/3/discover/movie?api_key=" + key +
+                                   "&page=";
 
-    URL url = new URL(uri);
-    HttpsURLConnection connection =
-      (HttpsURLConnection) url.openConnection();
-    connection.setRequestMethod("GET");
-    connection.setRequestProperty("Accept", "application/xml");
+    HttpsClient httpsClient = new HttpsClient();
+    String input = httpsClient.getContent(genresURL);
+    HashMap<Integer, String> genres = JsonParser.parseGenes(input);
+    System.out.println(genres);
+    input = httpsClient.getContent(filmUrlWithoutPageNum + pageNumber);
+    int totalPages = JsonParser.getTotalPagesNumber(input);
+    int count = 0;
+    System.out.println("Input genre ID");
+    int genreId = InputReaderUtils.nextInt();
 
-    InputStream is = connection.getInputStream();
-    InputStreamReader isr = new InputStreamReader(is);
-    BufferedReader br = new BufferedReader(isr);
+    // Проверять на наличие такого id
+    // Если нет - вводить снова
+    // Если введено не число - завершить программу
 
-    String inputLine;
+    JSONArray films;
+    float averageSum = 0;
+    int countWithoutZeros = 0;
+    float averageSumWithoutZeros = 0;
 
-    while ((inputLine = br.readLine()) != null) {
-      System.out.println(inputLine);
+    while (pageNumber < totalPages) {
+      System.out.println(pageNumber);
+      input = httpsClient.getContent(filmUrlWithoutPageNum + pageNumber);
+      films = JsonParser.getFilmsArray(input);
+      for (int i = 0; i < films.length(); i++) {
+        int id = films.getJSONObject(i).getInt("id");
+        float voteAverage;
+        String title = films.getJSONObject(i).getString("title");
+        voteAverage = films.getJSONObject(i).getFloat("vote_average");
+        JSONArray genreIds = films.getJSONObject(i).getJSONArray("genre_ids");
+        if (JsonParser.isJSONArrayContains(genreIds, genreId)) {
+          System.out.println("id: " + id + " title: " + title + " voteAvarage: " + voteAverage + " genreIds: " +
+                             genreIds);
+          averageSum += voteAverage;
+          if (voteAverage != 0.0) {
+            averageSumWithoutZeros += voteAverage;
+            countWithoutZeros++;
+          }
+          count++;
+        }
+
+      }
+      pageNumber++;
     }
-    //////////
+    System.out.println("count = " + count);
+    System.out.println("averageSum = " + averageSum);
+    System.out.println("average= " + averageSum / count);
+    System.out.println("average without zeros = " + averageSumWithoutZeros / countWithoutZeros);
+    //JsonParser.getFilmsArray(input);
+  }
+
+  private float calcAverage() {
+    return 0;
   }
 
 }
