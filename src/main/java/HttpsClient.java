@@ -22,9 +22,6 @@ public class HttpsClient {
               new InputStreamReader(con.getInputStream()));
 
           input = br.readLine();
-//        while ((input = br.readLine()) != null){
-//          System.out.println(input);
-//        }
           br.close();
 
         } catch (IOException e) {
